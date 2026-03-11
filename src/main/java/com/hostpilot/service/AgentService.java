@@ -1,36 +1,86 @@
-package com.hostpilot.ai;
+package com.hostpilot.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.hostpilot.ai.AiService;
+import com.hostpilot.dto.AgentReply;
+import com.hostpilot.dto.ChatMessage;
+import com.hostpilot.intent.Intent;
+import com.hostpilot.intent.IntentService;
+import com.hostpilot.model.Property;
+import com.hostpilot.repository.PropertyRepository;
+import com.hostpilot.template.TemplateService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class AiService {
+@RequiredArgsConstructor
+public class AgentService {
 
-    private final WebClient client;
+    private final PropertyRepository propertyRepository;
+    private final AiService aiService;
+    private final MemoryService memoryService;
+    private final IntentService intentService;
+    private final TemplateService templateService;
+    private final LanguageService languageService;
 
-    @Value("${openai.api.key}")
-    private String apiKey;
+    public AgentReply replyToGuest(Long propertyId, String message) {
 
-    public AiService(WebClient client) {
-        this.client = client;
-    }
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new RuntimeException("Property not found"));
 
-    public String generateReply(String context, String userMessage) {
+        // Detectar idioma del huésped
+        String lang = languageService.detectLanguage(message);
 
-        String prompt = """
-                Eres Hostpilot, un asistente para apartamentos turísticos.
-                Usa SOLO la información del contexto del piso.
-                Si el huésped pregunta algo que no está en el contexto, pide más detalles.
+        // Detectar intención
+        Intent intent = intentService.detectIntent(message);
 
-                CONTEXTO:
+        // Si hay plantilla → traducir → devolver
+        String template = templateService.generateTemplate(intent, property);
+        if (template != null) {
+
+            String translated = aiService.translate(template, lang);
+
+            memoryService.addMessage(propertyId, new ChatMessage("guest", message));
+            memoryService.addMessage(propertyId, new ChatMessage("agent", translated));
+
+            return new AgentReply(translated);
+        }
+
+        // Si no hay plantilla → IA con memoria
+        memoryService.addMessage(propertyId, new ChatMessage("guest", message));
+
+        String history = memoryService.getHistory(propertyId).stream()
+                .map(m -> m.getRole() + ": " + m.getContent())
+                .reduce("", (a, b) -> a + b + "\n");
+
+        String context = """
+                Conversation history:
                 %s
 
-                MENSAJE DEL HUÉSPED:
-                %s
-                """.formatted(context, userMessage);
+                Property:
+                Name: %s
+                Address: %s
+                Check-in: %s
+                Check-out: %s
+                Wifi: %s / %s
+                Rules: %s
+                Description: %s
+                """.formatted(
+                history,
+                property.getName(),
+                property.getAddress(),
+                property.getCheckIn(),
+                property.getCheckOut(),
+                property.getWifiName(),
+                property.getWifiPassword(),
+                property.getRules(),
+                property.getDescription()
+        );
 
-        // Aquí luego añadiremos la llamada real a OpenAI
-        return "Respuesta generada (placeholder): " + userMessage;
+        String aiReply = aiService.generateReply(context, message);
+
+        memoryService.addMessage(propertyId, new ChatMessage("agent", aiReply));
+
+        return new AgentReply(aiReply);
     }
 }
+

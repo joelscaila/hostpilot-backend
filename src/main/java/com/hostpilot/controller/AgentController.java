@@ -1,22 +1,20 @@
-package com.hostpilot.model;
+package com.hostpilot.controller;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import com.hostpilot.dto.AgentReply;
+import com.hostpilot.dto.AgentRequest;
+import com.hostpilot.service.AgentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
-@Entity
-@Data
-public class Property {
+@RestController
+@RequestMapping("/agent")
+@RequiredArgsConstructor
+public class AgentController {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final AgentService agentService;
 
-    private Long hostId;
-    private String name;
-    private String wifi;
-    private String checkIn;
-    private String checkOut;
-    private String rules;
-    private String location;
-    private String welcomeMessage;
+    @PostMapping("/reply")
+    public AgentReply reply(@RequestBody AgentRequest request) {
+        return agentService.replyToGuest(request.getPropertyId(), request.getMessage());
+    }
 }

@@ -1,22 +1,9 @@
-package com.hostpilot.model;
+package com.hostpilot.dto;
 
-import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
 @Data
-public class Property {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private Long hostId;
-    private String name;
-    private String wifi;
-    private String checkIn;
-    private String checkOut;
-    private String rules;
-    private String location;
-    private String welcomeMessage;
+public class AgentRequest {
+    private Long propertyId;
+    private String message;
 }

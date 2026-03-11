@@ -1,65 +1,41 @@
-package com.hostpilot.service;
+package com.hostpilot.intent;
 
 import com.hostpilot.ai.AiService;
-import com.hostpilot.dto.AgentReply;
-import com.hostpilot.dto.ChatMessage;
-import com.hostpilot.model.Property;
-import com.hostpilot.repository.PropertyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AgentService {
+public class IntentService {
 
-    private final PropertyRepository propertyRepository;
     private final AiService aiService;
-    private final MemoryService memoryService;
 
-    public AgentReply replyToGuest(Long propertyId, String message) {
+    public Intent detectIntent(String message) {
+        String m = message.toLowerCase();
 
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+        // 1. Reglas rápidas (es/en)
+        if (m.contains("check in") || m.contains("llegada") || m.contains("hora de entrada"))
+            return Intent.CHECK_IN;
 
-        // Guardar mensaje del huésped
-        memoryService.addMessage(propertyId, new ChatMessage("guest", message));
+        if (m.contains("check out") || m.contains("salida") || m.contains("hora de salida"))
+            return Intent.CHECK_OUT;
 
-        // Construir historial
-        StringBuilder historyText = new StringBuilder();
-        for (ChatMessage msg : memoryService.getHistory(propertyId)) {
-            historyText.append(msg.getRole()).append(": ").append(msg.getContent()).append("\n");
+        if (m.contains("wifi") || m.contains("internet") || m.contains("contraseña"))
+            return Intent.WIFI;
+
+        if (m.contains("normas") || m.contains("reglas") || m.contains("rules"))
+            return Intent.RULES;
+
+        if (m.contains("dirección") || m.contains("address") || m.contains("ubicación"))
+            return Intent.ADDRESS;
+
+        // 2. IA para detectar intención en cualquier idioma
+        String result = aiService.classifyIntent(message);
+
+        try {
+            return Intent.valueOf(result);
+        } catch (Exception e) {
+            return Intent.UNKNOWN;
         }
-
-        String context = """
-                Conversation history:
-                %s
-
-                Property:
-                Name: %s
-                Address: %s
-                Check-in: %s
-                Check-out: %s
-                Wifi: %s / %s
-                Rules: %s
-                Description: %s
-                """.formatted(
-                historyText,
-                property.getName(),
-                property.getAddress(),
-                property.getCheckIn(),
-                property.getCheckOut(),
-                property.getWifiName(),
-                property.getWifiPassword(),
-                property.getRules(),
-                property.getDescription()
-        );
-
-        String aiReply = aiService.generateReply(context, message);
-
-        // Guardar respuesta del agente
-        memoryService.addMessage(propertyId, new ChatMessage("agent", aiReply));
-
-        return new AgentReply(aiReply);
     }
 }
-

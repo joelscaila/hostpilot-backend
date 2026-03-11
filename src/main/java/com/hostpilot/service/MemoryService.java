@@ -1,45 +1,34 @@
 package com.hostpilot.service;
 
-import com.hostpilot.ai.AiService;
-import com.hostpilot.dto.AgentReply;
-import com.hostpilot.model.Property;
-import com.hostpilot.repository.PropertyRepository;
-import lombok.RequiredArgsConstructor;
+import com.hostpilot.dto.ChatMessage;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
-@RequiredArgsConstructor
-public class AgentService {
+public class MemoryService {
 
-    private final PropertyRepository propertyRepository;
-    private final AiService aiService;
+    private final Map<Long, Deque<ChatMessage>> memory = new HashMap<>();
 
-    public AgentReply replyToGuest(Long propertyId, String message) {
+    private static final int MAX_HISTORY = 5;
 
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+    public void addMessage(Long propertyId, ChatMessage message) {
+        memory.putIfAbsent(propertyId, new ArrayDeque<>());
 
-        String context = """
-                Name: %s
-                Address: %s
-                Check-in: %s
-                Check-out: %s
-                Wifi: %s / %s
-                Rules: %s
-                Description: %s
-                """.formatted(
-                property.getName(),
-                property.getAddress(),
-                property.getCheckIn(),
-                property.getCheckOut(),
-                property.getWifiName(),
-                property.getWifiPassword(),
-                property.getRules(),
-                property.getDescription()
-        );
+        Deque<ChatMessage> history = memory.get(propertyId);
 
-        String aiReply = aiService.generateReply(context, message);
+        if (history.size() >= MAX_HISTORY) {
+            history.removeFirst();
+        }
 
-        return new AgentReply(aiReply);
+        history.addLast(message);
+    }
+
+    public List<ChatMessage> getHistory(Long propertyId) {
+        return new ArrayList<>(memory.getOrDefault(propertyId, new ArrayDeque<>()));
+    }
+
+    public void clearHistory(Long propertyId) {
+        memory.remove(propertyId);
     }
 }

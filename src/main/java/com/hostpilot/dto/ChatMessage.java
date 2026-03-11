@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AgentReply {
-    private String reply;
+public class ChatMessage {
+    private String role; // "guest" o "agent"
+    private String content;
 }

@@ -1,33 +1,25 @@
-package com.hostpilot.intent;
+package com.hostpilot.language;
 
-import com.hostpilot.ai.AiService;
+import com.hostpilot.service.LanguageService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class IntentServiceTest {
+class LanguageServiceTest {
+
+    LanguageService service = new LanguageService();
 
     @Test
-    void testWifiInChinese() {
-        AiService ai = Mockito.mock(AiService.class);
-        Mockito.when(ai.classifyIntent("请问WiFi密码是多少？")).thenReturn("WIFI");
-
-        IntentService service = new IntentService(ai);
-
-        Intent result = service.detectIntent("请问WiFi密码是多少？");
-        assertEquals(Intent.WIFI, result);
+    void testDetectChinese() {
+        assertEquals("zh", service.detectLanguage("你好"));
     }
 
     @Test
-    void testFrenchSupermarketShouldBeUnknown() {
-        AiService ai = Mockito.mock(AiService.class);
-        Mockito.when(ai.classifyIntent("Y a-t-il un supermarché à proximité ?"))
-                .thenReturn("UNKNOWN");
+    void testDetectFrench() {
+        assertEquals("fr", service.detectLanguage("Bonjour"));
+    }
 
-        IntentService service = new IntentService(ai);
-
-        Intent result = service.detectIntent("Y a-t-il un supermarché à proximité ?");
-        assertEquals(Intent.UNKNOWN, result);
+    @Test
+    void testDetectSpanish() {
+        assertEquals("es", service.detectLanguage("Hola"));
     }
 }

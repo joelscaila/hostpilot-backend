@@ -1,27 +1,33 @@
-package com.hostpilot.service;
+package com.hostpilot.intent;
 
 import com.hostpilot.ai.AiService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-@Service
-@RequiredArgsConstructor
-public class LanguageService {
+import static org.junit.jupiter.api.Assertions.*;
 
-    private final AiService aiService;
+class IntentServiceTest {
 
-    public String detectLanguage(String message) {
+    @Test
+    void testWifiInChinese() {
+        AiService ai = Mockito.mock(AiService.class);
+        Mockito.when(ai.classifyIntent("请问WiFi密码是多少？")).thenReturn("WIFI");
 
-        String prompt = """
-                Detect the language of the following message.
-                Respond ONLY with the ISO 639-1 language code (like "es", "en", "fr", "zh", "ar", "de", "it", "ja", "ko").
-                
-                Message:
-                "%s"
-                """.formatted(message);
+        IntentService service = new IntentService(ai);
 
-        String result = aiService.generateReply(prompt, "");
+        Intent result = service.detectIntent("请问WiFi密码是多少？");
+        assertEquals(Intent.WIFI, result);
+    }
 
-        return result.trim().toLowerCase();
+    @Test
+    void testFrenchSupermarketShouldBeUnknown() {
+        AiService ai = Mockito.mock(AiService.class);
+        Mockito.when(ai.classifyIntent("Y a-t-il un supermarché à proximité ?"))
+                .thenReturn("UNKNOWN");
+
+        IntentService service = new IntentService(ai);
+
+        Intent result = service.detectIntent("Y a-t-il un supermarché à proximité ?");
+        assertEquals(Intent.UNKNOWN, result);
     }
 }

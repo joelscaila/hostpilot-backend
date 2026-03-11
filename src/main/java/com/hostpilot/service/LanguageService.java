@@ -1,65 +1,36 @@
 package com.hostpilot.service;
 
-import com.hostpilot.ai.AiService;
-import com.hostpilot.dto.AgentReply;
-import com.hostpilot.dto.ChatMessage;
-import com.hostpilot.model.Property;
-import com.hostpilot.repository.PropertyRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-public class AgentService {
+public class LanguageService {
 
-    private final PropertyRepository propertyRepository;
-    private final AiService aiService;
-    private final MemoryService memoryService;
+    public String detectLanguage(String text) {
+        if (text == null || text.isBlank()) return "es";
 
-    public AgentReply replyToGuest(Long propertyId, String message) {
+        text = text.trim().toLowerCase();
 
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+        // Chino
+        if (text.matches(".*[\\u4e00-\\u9fff].*")) return "zh";
 
-        // Guardar mensaje del huésped
-        memoryService.addMessage(propertyId, new ChatMessage("guest", message));
+        // Japonés
+        if (text.matches(".*[\\u3040-\\u309f\\u30a0-\\u30ff].*")) return "ja";
 
-        // Construir historial
-        StringBuilder historyText = new StringBuilder();
-        for (ChatMessage msg : memoryService.getHistory(propertyId)) {
-            historyText.append(msg.getRole()).append(": ").append(msg.getContent()).append("\n");
-        }
+        // Coreano
+        if (text.matches(".*[\\uac00-\\ud7af].*")) return "ko";
 
-        String context = """
-                Conversation history:
-                %s
+        // Francés (palabras muy distintivas)
+        if (text.matches(".*\\b(bonjour|merci|supermarché|proximité|s'il vous plaît|adresse|réseau)\\b.*"))
+            return "fr";
 
-                Property:
-                Name: %s
-                Address: %s
-                Check-in: %s
-                Check-out: %s
-                Wifi: %s / %s
-                Rules: %s
-                Description: %s
-                """.formatted(
-                historyText,
-                property.getName(),
-                property.getAddress(),
-                property.getCheckIn(),
-                property.getCheckOut(),
-                property.getWifiName(),
-                property.getWifiPassword(),
-                property.getRules(),
-                property.getDescription()
-        );
+        // Alemán
+        if (text.matches(".*\\b(hallo|danke|straße|bitte|netzwerk)\\b.*"))
+            return "de";
 
-        String aiReply = aiService.generateReply(context, message);
+        // Inglés
+        if (text.matches(".*\\b(hello|please|thanks|wifi|address|network)\\b.*"))
+            return "en";
 
-        // Guardar respuesta del agente
-        memoryService.addMessage(propertyId, new ChatMessage("agent", aiReply));
-
-        return new AgentReply(aiReply);
+        return "es";
     }
 }
-

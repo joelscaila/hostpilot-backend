@@ -1,35 +1,39 @@
 package com.hostpilot.template;
 
-import com.hostpilot.ai.AiService;
 import com.hostpilot.intent.Intent;
-import com.hostpilot.intent.IntentService;
+import com.hostpilot.model.Property;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TemplateServiceTest {
 
-    @Test
-    void testWifiInChinese() {
-        AiService ai = Mockito.mock(AiService.class);
-        Mockito.when(ai.classifyIntent("请问WiFi密码是多少？")).thenReturn("WIFI");
+    TemplateService service = new TemplateService();
 
-        IntentService service = new IntentService(ai);
+    private Property property;
 
-        Intent result = service.detectIntent("请问WiFi密码是多少？");
-        assertEquals(Intent.WIFI, result);
+    @BeforeEach
+    void setUp() {
+        service = new TemplateService();
+
+        property = new Property();
+        property.setWifiName("MiWifi");
+        property.setWifiPassword("12345678");
+        property.setAddress("Calle Mayor 123, Madrid");
+        property.setCheckIn("15:00");
+        property.setCheckOut("11:00");
+        property.setRules("No fumar. No fiestas.");
     }
 
     @Test
-    void testFrenchSupermarketShouldBeUnknown() {
-        AiService ai = Mockito.mock(AiService.class);
-        Mockito.when(ai.classifyIntent("Y a-t-il un supermarché à proximité ?"))
-                .thenReturn("UNKNOWN");
+    void testWifiTemplate() {
+        String result = service.generateTemplate(Intent.WIFI, property);
+        assertTrue(result.contains("La red wifi es"));
+    }
 
-        IntentService service = new IntentService(ai);
-
-        Intent result = service.detectIntent("Y a-t-il un supermarché à proximité ?");
-        assertEquals(Intent.UNKNOWN, result);
+    @Test
+    void testCheckInTemplate() {
+        String result = service.generateTemplate(Intent.CHECK_IN, property);
+        assertTrue(result.contains("El check-in es"));
     }
 }

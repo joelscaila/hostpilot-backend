@@ -3,14 +3,14 @@ package com.hostpilot.dto;
 import lombok.Data;
 
 @Data
-public class AiRequest {
-    private String model;
-    private String prompt;
-    private boolean stream;
-
-    public AiRequest(String model, String prompt) {
-        this.model = model;
-        this.prompt = prompt;
-        this.stream = false;
-    }
+public class PropertyDto {
+    private Long id;
+    private String name;
+    private String address;
+    private String checkIn;
+    private String checkOut;
+    private String wifiName;
+    private String wifiPassword;
+    private String rules;
+    private String description;
 }

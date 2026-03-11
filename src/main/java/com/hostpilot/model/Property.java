@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "properties")
 @Data
 public class Property {
 
@@ -11,12 +12,21 @@ public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long hostId;
     private String name;
-    private String wifi;
+
+    private String address;
+
     private String checkIn;
+
     private String checkOut;
+
+    private String wifiName;
+
+    private String wifiPassword;
+
+    @Column(length = 2000)
     private String rules;
-    private String location;
-    private String welcomeMessage;
+
+    @Column(length = 5000)
+    private String description;
 }

@@ -3,7 +3,14 @@ package com.hostpilot.dto;
 import lombok.Data;
 
 @Data
-public class AiMessage {
-    private String role;
-    private String content;
+public class AiRequest {
+    private String model;
+    private String prompt;
+    private boolean stream;
+
+    public AiRequest(String model, String prompt) {
+        this.model = model;
+        this.prompt = prompt;
+        this.stream = false;
+    }
 }
