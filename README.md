@@ -1,145 +1,145 @@
 # 🏡 HostPilot Backend — MVP
 
-Backend modular para un **agente conversacional inteligente** orientado a propiedades de alquiler. Incluye detección de idioma, clasificación de intención, plantillas dinámicas, memoria contextual y generación de respuestas mediante IA.
+Modular backend for an **intelligent conversational agent** designed for rental properties. Includes language detection, intent classification, dynamic templates, contextual memory, and AI‑generated responses.
 
-> **Nota:** En esta fase inicial del MVP, el proyecto usa **Ollama en local** para la generación de respuestas.  
-> La arquitectura está diseñada para permitir una **migración sencilla a OpenAI, Azure OpenAI o cualquier proveedor cloud** sin cambios estructurales.
+> **Note:** In this initial MVP phase, the project uses **Ollama locally** for response generation.  
+> The architecture is designed to allow an **easy migration to OpenAI, Azure OpenAI, or any cloud provider** without structural changes.
 
 ---
 
-## 🚀 Características principales
+## 🚀 Main Features
 
-### 🧠 Agente conversacional inteligente
-- Detecta automáticamente el idioma del usuario (ES, EN, FR, ZH…)
-- Clasifica la intención del mensaje (wifi, check-in, normas, etc.)
-- Usa plantillas predefinidas cuando existe una intención conocida
-- Usa IA libre cuando no hay plantilla disponible
-- Traduce la respuesta al idioma del usuario
+### 🧠 Intelligent Conversational Agent
+- Automatically detects the user's language (ES, EN, FR, ZH…)
+- Classifies message intent (wifi, check‑in, house rules, etc.)
+- Uses predefined templates when a known intent is detected
+- Falls back to AI generation when no template is available
+- Translates the final response to the user's language
 
-### 🏠 Gestión de propiedades
-- Información cargada desde base de datos
-- Mapeo automático con DTOs
-- Repositorio JPA con H2 en memoria para el MVP
+### 🏠 Property Management
+- Property information loaded from the database
+- Automatic DTO mapping
+- JPA repository with in‑memory H2 for the MVP
 
-### 🤖 Integración con IA (Ollama → OpenAI-ready)
-- Actualmente: Ollama local para desarrollo rápido y sin costes  
-- Preparado para producción: OpenAI, Azure OpenAI, Groq, DeepSeek  
-- El cambio es tan simple como sustituir el cliente en `AiService`
+### 🤖 AI Integration (Ollama → OpenAI‑ready)
+- Currently: Local Ollama for fast, cost‑free development  
+- Production‑ready for: OpenAI, Azure OpenAI, Groq, DeepSeek  
+- Switching providers is as simple as replacing the client in `AiService`
 
-### 🧪 Test suite completa
-- Tests unitarios para:
+### 🧪 Complete Test Suite
+- Unit tests for:
   - IntentService  
   - LanguageService  
   - TemplateService  
-  - AgentService (flujo completo)
+  - AgentService (full pipeline)
 
 ---
 
-## 📂 Estructura del proyecto
+## 📂 Project Structure
 
 src/  
  ├── main/java/com/hostpilot  
- │    ├── controller/ → Endpoints REST  
- │    ├── dto/ → Modelos de entrada/salida  
- │    ├── service/ → Lógica de negocio  
- │    ├── ai/ → Cliente IA (Ollama / OpenAI-ready)  
- │    ├── intent/ → Detección de intención  
- │    ├── template/ → Plantillas por intención  
- │    ├── model/ → Entidades JPA  
- │    ├── repository/ → Repositorios Spring Data  
- │    └── config/ → Configuración WebClient  
+ │    ├── controller/ → REST endpoints  
+ │    ├── dto/ → Input/output models  
+ │    ├── service/ → Business logic  
+ │    ├── ai/ → AI client (Ollama / OpenAI‑ready)  
+ │    ├── intent/ → Intent detection  
+ │    ├── template/ → Intent templates  
+ │    ├── model/ → JPA entities  
+ │    ├── repository/ → Spring Data repositories  
+ │    └── config/ → WebClient configuration  
  │  
  └── test/java/com/hostpilot  
-      ├── agent/ → Tests del flujo completo  
-      ├── intent/ → Tests de intención  
-      ├── language/ → Tests de idioma  
-      └── template/ → Tests de plantillas  
+      ├── agent/ → Full pipeline tests  
+      ├── intent/ → Intent tests  
+      ├── language/ → Language tests  
+      └── template/ → Template tests  
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## 🛠️ Technologies Used
 
 - Java 21  
 - Spring Boot 3  
 - Spring Web  
 - Spring Data JPA  
-- H2 Database (modo memoria)  
+- H2 Database (in‑memory mode)  
 - Lombok  
-- Ollama (solo en fase MVP)  
+- Ollama (MVP only)  
 - JUnit 5  
 
 ---
 
-## ▶️ Cómo ejecutar el proyecto
+## ▶️ How to Run the Project
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 git clone https://github.com/joelscaila/hostpilot-backend.git  
 cd hostpilot-backend
 
-### 2. Iniciar Ollama (solo para el MVP)
+### 2. Start Ollama (MVP only)
 ollama serve
 
-### 3. Ejecutar la aplicación
+### 3. Run the application
 mvn spring-boot:run
 
-La API estará disponible en:  
+API available at:  
 http://localhost:8080
 
 ---
 
-## 📡 Endpoints principales
+## 📡 Main Endpoints
 
 ### POST /properties
 
-## 🏡 Ejemplo de Property
+## 🏡 Example Property
 
     {
       "id": 1,
-      "name": "Apartamento Costa Brava",
+      "name": "Costa Brava Apartment",
       "wifiName": "CostaBravaWifi",
       "wifiPassword": "playa1234",
       "address": "Carrer del Mar 42, Girona",
       "checkInTime": "15:00",
       "checkOutTime": "11:00",
       "houseRules": [
-        "No fumar dentro del apartamento",
-        "No se permiten fiestas",
-        "Respetar horarios de descanso"
+        "No smoking inside the apartment",
+        "No parties allowed",
+        "Respect quiet hours"
       ],
       "emergencyContact": "+34 600 123 456",
-      "notes": "La llave está en la caja fuerte junto a la puerta. Código: 4829."
+      "notes": "The key is in the lockbox next to the door. Code: 4829."
     }
 
 ---
 
 ### POST /agent/reply
-Genera una respuesta del agente en el idioma del usuario.
+Generates an agent response in the user's language.
 
-**Ejemplo de request:**
+**Example request:**
 
     {
       "propertyId": 1,
-      "message": "¿Cuál es la contraseña del WiFi?"
+      "message": "What is the WiFi password?"
     }
 
-**Ejemplo de response:**
+**Example response:**
 
     {
-      "reply": "La red WiFi se llama CostaBravaWifi y la contraseña es playa1234."
+      "reply": "The WiFi network is CostaBravaWifi and the password is playa1234."
     }
 
 ---
 
-## 🧪 Ejecutar los tests
+## 🧪 Run Tests
 mvn test
 
 ---
 
 ## 🧭 Roadmap
 
-- [ ] Añadir más intenciones (supermercado, transporte, emergencias…)  
-- [ ] Persistencia real (Postgres)  
-- [ ] Interfaz web para el agente  
-- [ ] Autenticación para propietarios  
+- [ ] Add more intents (supermarket, transport, emergencies…)  
+- [ ] Real persistence (Postgres)  
+- [ ] Web interface for the agent  
+- [ ] Owner authentication  
 
 ---
