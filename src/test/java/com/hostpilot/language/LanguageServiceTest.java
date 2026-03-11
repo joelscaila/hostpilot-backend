@@ -1,0 +1,33 @@
+package com.hostpilot.intent;
+
+import com.hostpilot.ai.AiService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class IntentServiceTest {
+
+    @Test
+    void testWifiInChinese() {
+        AiService ai = Mockito.mock(AiService.class);
+        Mockito.when(ai.classifyIntent("请问WiFi密码是多少？")).thenReturn("WIFI");
+
+        IntentService service = new IntentService(ai);
+
+        Intent result = service.detectIntent("请问WiFi密码是多少？");
+        assertEquals(Intent.WIFI, result);
+    }
+
+    @Test
+    void testFrenchSupermarketShouldBeUnknown() {
+        AiService ai = Mockito.mock(AiService.class);
+        Mockito.when(ai.classifyIntent("Y a-t-il un supermarché à proximité ?"))
+                .thenReturn("UNKNOWN");
+
+        IntentService service = new IntentService(ai);
+
+        Intent result = service.detectIntent("Y a-t-il un supermarché à proximité ?");
+        assertEquals(Intent.UNKNOWN, result);
+    }
+}
