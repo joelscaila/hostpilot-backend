@@ -1,4 +1,4 @@
-# 🏡 HostPilot Backend — MVP
+#  HostPilot Backend — MVP
 
 Modular backend for an **intelligent conversational agent** designed for rental properties. Includes language detection, intent classification, dynamic templates, contextual memory, and AI‑generated responses.
 
@@ -7,26 +7,26 @@ Modular backend for an **intelligent conversational agent** designed for rental 
 
 ---
 
-## 🚀 Main Features
+##  Main Features
 
-### 🧠 Intelligent Conversational Agent
+###  Intelligent Conversational Agent
 - Automatically detects the user's language (ES, EN, FR, ZH…)
 - Classifies message intent (wifi, check‑in, house rules, etc.)
 - Uses predefined templates when a known intent is detected
 - Falls back to AI generation when no template is available
 - Translates the final response to the user's language
 
-### 🏠 Property Management
+###  Property Management
 - Property information loaded from the database
 - Automatic DTO mapping
 - JPA repository with in‑memory H2 for the MVP
 
-### 🤖 AI Integration (Ollama → OpenAI‑ready)
+###  AI Integration (Ollama → OpenAI‑ready)
 - Currently: Local Ollama for fast, cost‑free development  
 - Production‑ready for: OpenAI, Azure OpenAI, Groq, DeepSeek  
 - Switching providers is as simple as replacing the client in `AiService`
 
-### 🧪 Complete Test Suite
+###  Complete Test Suite
 - Unit tests for:
   - IntentService  
   - LanguageService  
@@ -35,7 +35,7 @@ Modular backend for an **intelligent conversational agent** designed for rental 
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 src/  
  ├── main/java/com/hostpilot  
@@ -57,7 +57,7 @@ src/
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - Java 21  
 - Spring Boot 3  
@@ -70,7 +70,7 @@ src/
 
 ---
 
-## ▶️ How to Run the Project
+##  How to Run the Project
 
 ### 1. Clone the repository
 git clone https://github.com/joelscaila/hostpilot-backend.git  
@@ -87,11 +87,11 @@ http://localhost:8080
 
 ---
 
-## 📡 Main Endpoints
+##  Main Endpoints
 
 ### POST /properties
 
-## 🏡 Example Property
+##  Example Property
 
     {
       "id": 1,
@@ -130,12 +130,12 @@ Generates an agent response in the user's language.
 
 ---
 
-## 🧪 Run Tests
+##  Run Tests
 mvn test
 
 ---
 
-## 🧭 Roadmap
+##  Roadmap
 
 - [ ] Add more intents (supermarket, transport, emergencies…)  
 - [ ] Real persistence (Postgres)  
